@@ -26,7 +26,7 @@
 // ---
 
 // Paperboy loads modules it depends on to operate
-const { ioredis:Redis, 'generic-pool': genericPool, dotenv } = require(`${process.cwd()}/dependencies`);
+const { ioredis:Redis, 'generic-pool': genericPool, dotenv } = require(`./dependencies`);
 
 // Paperboy adds the `.env file` variables to the process
 dotenv.config();
