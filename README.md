@@ -1,4 +1,8 @@
 # Paperboy
+[![Build Status](https://travis-ci.org/altereagle/paperboy.svg?branch=master)](https://travis-ci.org/altereagle/paperboy)
+[![Maintainability](https://api.codeclimate.com/v1/badges/900b1cc8d6ba2062a8de/maintainability)](https://codeclimate.com/github/altereagle/paperboy/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/900b1cc8d6ba2062a8de/test_coverage)](https://codeclimate.com/github/altereagle/paperboy/test_coverage)
+
 ### An intersystem communicator
 ![gif](https://media.giphy.com/media/eoUwc3wSwDOvK/giphy.gif)
 

@@ -1,0 +1,55 @@
+version: "2"
+checks:
+  argument-count:
+    config:
+      threshold: 4
+  complex-logic:
+    config:
+      threshold: 10
+  file-lines:
+    config:
+      threshold: 250
+  method-complexity:
+    config:
+      threshold: 10
+  method-count:
+    config:
+      threshold: 20
+  method-lines:
+    config:
+      threshold: 50
+  nested-control-flow:
+    config:
+      threshold: 4
+  return-statements:
+    config:
+      threshold: 8
+  similar-code:
+    config:
+      languages:
+        javascript:
+          threshold: 133
+  identical-code:
+    config:
+      languages:
+        javascript:
+          threshold: 133
+plugins:
+  fixme:
+    enabled: true
+  eslint:
+    enabled: true
+    config:
+      config: .eslintrc
+  csslint:
+    enabled: true
+  nodesecurity:
+    enabled: true
+  duplication:
+    enabled: true
+    config:
+      languages:
+        javascript:
+          mass_threshold: 133
+exclude_patterns:
+  - "npm-shrinkwrap.json"
