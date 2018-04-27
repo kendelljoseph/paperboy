@@ -33,6 +33,7 @@ dotenv.config();
 
 // Paperboy loads the native event emitter module
 const EventEmitter = require(`events`);
+const { exec }     = require(`child_process`);
 
 // Paperboy creates an event metter using the native event emitter module
 class PaperboyEventEmitter extends EventEmitter {}
@@ -44,19 +45,86 @@ const createRedisConnectionPool = ({connectionName = `unnamed-connection`} = {},
   return genericPool.createPool({
     // **Given** the connection pool needs to create a new Redis connection
     create: function() {
-      // **When** the connection pool sets the name of the connection
-      const name = `@${connectionName}-${poolType}`;
       
-      // **And** the connection pool creates a connection to _Redis_ using the _URL_ from the `.env` file
-      const connection = new Redis(process.env.PAPERBOY_REDIS_URL, {connectionName: name});
+      // **And** the connection sets its url and name
+      const getUrlAndConnectionName = () => {
+        return new Promise((resolve) => {
+          resolve({
+            connectionName: `@${connectionName}-${poolType}`,
+            url           : process.env.PAPERBOY_REDIS_URL
+          });
+        });
+      };
+      
+      // **And** the connection is made
+      const createRedisConnection = ({connectionName, url}) => {
+        return new Promise((resolve) => {
+          const connection = new Redis(url, {connectionName, enableReadyCheck: true});
+          resolve(connection);
+        });
+      };
+      
+      // **And** the connection can listen to messages
+      const listenForMessages = (connection) => {
+        return new Promise((resolve) => {
+          connection.on(`message`, (channel, message) => {
+            paperboyEvent.emit(channel, message);
+          });
+          
+          resolve(connection);
+        });
+      };
+      
+      // **And** the connection can listen to errors
+      const listenForErrors = (connection) => {
+        return new Promise((resolve) => {
+          let execRan = false;
+          connection.on(`error`, ({address, port}) => {
+            const errorMessage = `paperboy-communicator can't connect to ${address}:${port}`;
+            console.error(errorMessage);
+            
+            // _Do not try to start redis if it has already been tried_
+            if(execRan) return;
+            execRan = true;
+            
+            // * Check if the address is local
+            if(address === `127.0.0.1`) {
+              const platform  = process.platform;
+              let execCommand = `sudo service redis-server start`;
+              
+              if(platform === `win32`) return;
+              if(platform === `darwin`) execCommand = `brew services start redis`;
+              
+              // * Start the local Redis server
+              exec(execCommand, (err, stdout, stderr) => {
+                if (err) {
+                  console.error(`Could not start redis on ${address}:${port}`);
+                  return;
+                }
+                
+                if(stdout){
+                  console.info(`paperboy-communicator stdout: ${stdout}`);
+                }
+                
+                if(stderr){
+                  console.info(`paperboy-communicator stderr: ${stderr}`);
+                }
+              });
+            }
+          });
 
-      // **Then** the connection will listen to _messages_ and emit an event _by channel_
-      connection.on(`message`, (channel, message) => {
-        paperboyEvent.emit(channel, message);
-      });
+          // * Continue if the connection is ready
+          connection.on(`ready`, () => {
+            resolve(connection);
+          });
+        });
+      };
       
       // **And** the creation method will return the new connection
-      return Promise.resolve(connection);
+      return getUrlAndConnectionName()
+        .then(createRedisConnection)
+        .then(listenForMessages)
+        .then(listenForErrors);
     },
     
     // **Given** the connection pool needs to destroy a connection

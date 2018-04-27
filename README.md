@@ -15,18 +15,7 @@
 <span style="color: maroon;">Redis stores, retrieves, and communicates between Node proceseses. It performs these tasks very reliably and quicky!
 You can [try Redis here!](http://try.redis.io/)</span>
 
-> Set the `PAPERBOY_REDIS_URL` in your `.env` file
-
-### Start <span style="color: maroon;">&#11041; Redis</span>
-  * _Quick_
-    ```bash
-    redis-server
-    ```  
-  * _Service Mode (Recommended)_
-    ```bash
-    sudo service redis-server start
-    ```
----
+> Set the `PAPERBOY_REDIS_URL` in your `.env` file (or don't and paperboy will use your local Redis server by default)
 
 ### Use
 **Example:** Paperboy can be used for data storage
